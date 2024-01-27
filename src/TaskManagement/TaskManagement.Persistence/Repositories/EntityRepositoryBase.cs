@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TaskManagement.Domain.Common.Exceptions;
+using TaskManagement.Domain.Common.Filtering.Extensions;
+using TaskManagement.Domain.Common.Filtering.Models;
 using TaskManagement.Domain.Common.Models;
 using TaskManagement.Persistence.Caching.Brokers;
 
@@ -13,12 +15,16 @@ public class EntityRepositoryBase<TEntity, TContext>(
 
     protected IQueryable<TEntity> Get(
         Expression<Func<TEntity, bool>>? predicate = default,
+        FilterModel? filterModel = default,
         bool asNoTracking = false)
     {
         var initialQuery = DbContext.Set<TEntity>().AsQueryable();
 
         if (predicate is not null)
             initialQuery = initialQuery.Where(predicate);
+
+        if (filterModel is not null)
+            initialQuery = initialQuery.ApplyPagination(filterModel);
 
         if (asNoTracking)
             initialQuery = initialQuery.AsNoTracking();
