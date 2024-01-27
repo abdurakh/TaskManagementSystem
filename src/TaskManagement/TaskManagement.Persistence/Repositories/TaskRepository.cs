@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using TaskManagement.Domain.Common.Exceptions;
 using TaskManagement.Domain.Common.Filtering.Models;
 using TaskManagement.Domain.Entities;
 using TaskManagement.Persistence.Caching.Brokers;
@@ -20,7 +21,18 @@ public class TaskRepository(AppDbContext dbContext, ICacheBroker cacheBroker)
         => base.GetByIdAsync(id, asNoTracking, cancellationToken);
 
     public new ValueTask<TaskModel> UpdateAsync(TaskModel taskModel, bool saveChanges = true, CancellationToken cancellationToken = default)
-        => base.UpdateAsync(taskModel, saveChanges, cancellationToken);
+    {
+        var foundTask = dbContext.Tasks.FirstOrDefault(dbTask => dbTask.Id == taskModel.Id)
+            ?? throw new EntityNotFoundException(typeof(TaskModel));
+
+        foundTask.Title = taskModel.Title;
+        foundTask.Description = taskModel.Description;
+        foundTask.DueDate = taskModel.DueDate;
+        foundTask.IsCompleted = taskModel.IsCompleted;
+        foundTask.Priority = taskModel.Priority;
+
+        return base.UpdateAsync(foundTask, saveChanges, cancellationToken);
+    }
 
     public new ValueTask<TaskModel> DeleteAsync(TaskModel taskModel, bool saveChanges = true, CancellationToken cancellationToken = default)
         => base.DeleteAsync(taskModel, saveChanges, cancellationToken);
