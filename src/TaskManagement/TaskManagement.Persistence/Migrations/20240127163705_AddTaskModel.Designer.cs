@@ -12,7 +12,7 @@ using TaskManagement.Persistence.DbContexts;
 namespace TaskManagement.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240127144020_AddTaskModel")]
+    [Migration("20240127163705_AddTaskModel")]
     partial class AddTaskModel
     {
         /// <inheritdoc />

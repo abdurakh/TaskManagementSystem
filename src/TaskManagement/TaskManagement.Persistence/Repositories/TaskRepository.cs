@@ -35,7 +35,12 @@ public class TaskRepository(AppDbContext dbContext, ICacheBroker cacheBroker)
     }
 
     public new ValueTask<TaskModel> DeleteAsync(TaskModel taskModel, bool saveChanges = true, CancellationToken cancellationToken = default)
-        => base.DeleteAsync(taskModel, saveChanges, cancellationToken);
+    {
+        var foundTask = dbContext.Tasks.FirstOrDefault(task => task.Id == taskModel.Id)
+            ?? throw new EntityNotFoundException(typeof(TaskModel));
+
+        return base.DeleteAsync(foundTask, saveChanges, cancellationToken);
+    }
 
     public new ValueTask<TaskModel> DeleteByIdAsync(Guid id, bool saveChanges = true, CancellationToken cancellationToken = default)
         => base.DeleteByIdAsync(id, saveChanges, cancellationToken);
